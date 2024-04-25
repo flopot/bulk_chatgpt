@@ -19,7 +19,6 @@ api_key = st.text_input("Enter your OpenAI API key", type="password")
 # File upload
 uploaded_file = st.file_uploader("Choose your CSV file", type=['csv'])
 
-# If a file is uploaded, show column selection and prompt customization
 if uploaded_file and api_key:
     # Initialize the OpenAI client with the user-provided API key
     client = OpenAI(api_key=api_key)
