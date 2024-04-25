@@ -42,23 +42,23 @@ if uploaded_file and api_key:
 
     # Iterate over each row in the DataFrame
     for index, row in df.iterrows():
-    try:
-        # Create a dictionary of column data ensuring all values are strings
-        prompt_data = {col: str(row[col]) if pd.notna(row[col]) else "N/A" for col in prompt_columns}
-
-        # Dynamically generate the messages
-        system_message = system_prompt.format(**prompt_data)
-        user_message = user_prompt.format(**prompt_data)
-
-        # Generate the SEO advice using the defined function
-        seo_advice = generate_response(system_message, user_message)
-        all_responses.append({col: row[col] for col in prompt_columns} | {'Recommendations': seo_advice})
-
-    except KeyError as e:
-        st.error(f"Missing a placeholder for '{e.args[0]}' in your prompt template. Please adjust your template.")
-        continue  # Skip to the next row
-
-    time.sleep(1)  # Pause to avoid rate limits
+        try:
+            # Create a dictionary of column data ensuring all values are strings
+            prompt_data = {col: str(row[col]) if pd.notna(row[col]) else "N/A" for col in prompt_columns}
+    
+            # Dynamically generate the messages
+            system_message = system_prompt.format(**prompt_data)
+            user_message = user_prompt.format(**prompt_data)
+    
+            # Generate the SEO advice using the defined function
+            seo_advice = generate_response(system_message, user_message)
+            all_responses.append({col: row[col] for col in prompt_columns} | {'Recommendations': seo_advice})
+    
+        except KeyError as e:
+            st.error(f"Missing a placeholder for '{e.args[0]}' in your prompt template. Please adjust your template.")
+            continue  # Skip to the next row
+    
+        time.sleep(1)  # Pause to avoid rate limits
 
     # Convert the responses into a DataFrame
     results_df = pd.DataFrame(all_responses)
