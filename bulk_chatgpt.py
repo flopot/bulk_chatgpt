@@ -39,21 +39,18 @@ if uploaded_file and api_key:
 
     # Iterate over each row in the DataFrame
     for index, row in df.iterrows():
+        # Create a dictionary of column data ensuring all values are strings and handling possible missing values
+        prompt_data = {col: str(row[col]) if pd.notna(row[col]) else "" for col in prompt_columns}
+    
         # Replace placeholders in the prompts with actual data
-        system_message = system_prompt.format(**{col: row[col] for col in prompt_columns})
-        user_message = user_prompt.format(**{col: row[col] for col in prompt_columns})
-
-        # Function to generate responses using the OpenAI client
-        def generate_response(system_message, user_message):
-            response = client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": user_message}
-                ],
-                model="gpt-4"
-            )
-            return response.choices[0].message.content.strip()
-
+        try:
+            system_message = system_prompt.format(**prompt_data)
+            user_message = user_prompt.format(**prompt_data)
+        except KeyError as e:
+            st.error(f"Missing a placeholder for '{e.args[0]}' in your prompt template. Please adjust your template.")
+            continue  # Skip this iteration and continue with the next
+    
+        # Generate response from OpenAI and store the results
         seo_advice = generate_response(system_message, user_message)
         all_responses.append({col: row[col] for col in prompt_columns} | {'Recommendations': seo_advice})
         time.sleep(1)  # To avoid hitting API rate limits
