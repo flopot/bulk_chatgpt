@@ -19,6 +19,20 @@ api_key = st.text_input("Enter your OpenAI API key", type="password")
 # File upload
 uploaded_file = st.file_uploader("Choose your CSV file", type=['csv'])
 
+def generate_response(client, system_message, user_message):
+    try:
+        response = client.chat_completions.create(
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_message}
+            ],
+            model="gpt-4"
+        )
+        return response.choices[0].message['content'].strip()
+    except Exception as e:
+        st.error(f"Failed to generate response: {str(e)}")
+        return None
+
 if uploaded_file and api_key:
     # Initialize the OpenAI client with the user-provided API key
     client = OpenAI(api_key=api_key)
@@ -36,28 +50,15 @@ if uploaded_file and api_key:
     
     all_responses = []
 
-    # Debug output
-    st.write("Selected columns for prompts:", prompt_columns)    
-
     # Iterate over each row in the DataFrame
     for index, row in df.iterrows():
-        try:
-            # Create a dictionary of column data ensuring all values are strings
-            prompt_data = {col: str(row[col]) if pd.notna(row[col]) else "N/A" for col in prompt_columns}
-    
-            # Dynamically generate the messages
-            system_message = system_prompt.format(**prompt_data)
-            user_message = user_prompt.format(**prompt_data)
-    
-            # Generate the SEO advice using the defined function
-            seo_advice = generate_response(system_message, user_message)
+        prompt_data = {col: str(row[col]) if pd.notna(row[col]) else "" for col in prompt_columns}
+        system_message = system_prompt.format(**prompt_data)
+        user_message = user_prompt.format(**prompt_data)
+        
+        seo_advice = generate_response(client, system_message, user_message)
+        if seo_advice is not None:
             all_responses.append({col: row[col] for col in prompt_columns} | {'Recommendations': seo_advice})
-    
-        except KeyError as e:
-            st.error(f"Missing a placeholder for '{e.args[0]}' in your prompt template. Please adjust your template.")
-            continue  # Skip to the next row
-    
-        time.sleep(1)  # Pause to avoid rate limits
 
     # Convert the responses into a DataFrame
     results_df = pd.DataFrame(all_responses)
