@@ -68,19 +68,21 @@ if uploaded_file:
         # Iterate over each row in the DataFrame and collect responses
         for index, row in df.iterrows():
             response = generate_response(row)
-            response_data = [row[col] for col in columns] + [response]
-            
-            # Debugging: Print response data
-            if index == 0:  # Just print for the first row to check
-                st.write("Response data for row 0:", response_data)
+            response_data = [row[col] for col in columns] + [response]  # Correctly building response data
+
+            # Print response data length for each row
+            st.write(f"Length of response data for row {index}: {len(response_data)}")  # Debugging line
             
             all_responses.append(response_data)
 
-        # Debugging: Check if the length is as expected
+        # Check each entry for correct length before DataFrame creation
+        incorrect_lengths = []
         for response_index, response_data in enumerate(all_responses):
             if len(response_data) != len(columns) + 1:
-                st.error(f"Error in row {response_index}: Expected {len(columns) + 1} elements, got {len(response_data)}")
-                break
+                incorrect_lengths.append((response_index, len(response_data)))
+
+        if incorrect_lengths:
+            st.error(f"Error in rows: {incorrect_lengths}")
         else:
             # Create the DataFrame and download button if all is well
             response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
