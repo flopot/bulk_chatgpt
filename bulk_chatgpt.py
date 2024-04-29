@@ -62,6 +62,9 @@ if uploaded_file:
             all_responses.append(response)
             time.sleep(1)  # To avoid hitting API rate limits
 
-        # Display responses
-        for response in all_responses:
-            st.text(response)
+        # Convert responses into a DataFrame
+        response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
+
+        # Convert DataFrame to CSV and create download button
+        csv = response_df.to_csv(index=False).encode('utf-8')
+        st.download_button("Download Responses as CSV", csv, "responses.csv", "text/csv")
