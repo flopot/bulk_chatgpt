@@ -62,9 +62,15 @@ if uploaded_file:
             all_responses.append(response)
             time.sleep(1)  # To avoid hitting API rate limits
 
-        # Convert responses into a DataFrame
-        response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
-
-        # Convert DataFrame to CSV and create download button
-        csv = response_df.to_csv(index=False).encode('utf-8')
-        st.download_button("Download Responses as CSV", csv, "responses.csv", "text/csv")
+        # Debugging: Ensure each entry has the correct number of elements
+        expected_length = len(columns) + 1  # Expected number of elements (columns + response)
+        for response_index, response_data in enumerate(all_responses):
+            if len(response_data) != expected_length:
+                st.error(f"Error in row {response_index}: Expected {expected_length} elements, got {len(response_data)}")
+                break
+        else:
+            # If all rows have the correct length, create the DataFrame
+            response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
+            # Convert DataFrame to CSV and create download button
+            csv = response_df.to_csv(index=False).encode('utf-8')
+            st.download_button("Download Responses as CSV", csv, "responses.csv", "text/csv")
