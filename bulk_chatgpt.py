@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from openai import OpenAI
 import time
+import io
 
 # Title and Setup
 st.title('Bulk ChatGPT')
@@ -33,9 +34,8 @@ if uploaded_file:
         column_to_variable[column] = variable_name
 
     # System and User Prompts customization
-    st.write("Edit the prompts and include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
-    system_prompt = st.text_area("Edit the system prompt", value="Please provide details for the following variables: {example_variable}.")
-    user_prompt_template = st.text_area("Edit the user prompt", value="Using the data: {example_variable}, provide insights on the SEO strategy.")
+    system_prompt = st.text_area("Edit the system prompt", value="Edit the system prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
+    user_prompt_template = st.text_area("Edit the user prompt", value="Edit the user prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
 
     # Initialize the OpenAI client with the user-provided API key if entered
     if api_key and st.button("Generate Response"):
@@ -62,7 +62,10 @@ if uploaded_file:
             all_responses.append(response)
             time.sleep(1)  # To avoid hitting API rate limits
 
-        # Display responses
-        for response in all_responses:
-            st.text(response)
+        # Convert responses into a DataFrame
+        response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
+
+        # Convert DataFrame to CSV and create download button
+        csv = response_df.to_csv(index=False).encode('utf-8')
+        st.download_button("Download Responses as CSV", csv, "responses.csv", "text/csv")
 
