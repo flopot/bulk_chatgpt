@@ -34,8 +34,8 @@ if uploaded_file:
         column_to_variable[column] = variable_name
 
     # System and User Prompts customization
-    system_prompt = st.text_area("Edit the system prompt", value="Translate to French   Edit the system prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
-    user_prompt_template = st.text_area("Edit the user prompt", value="Translate {Keyword} to French   Edit the user prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
+    system_prompt = st.text_area("Edit the system prompt", value="Edit the system prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
+    user_prompt_template = st.text_area("Edit the user prompt", value="Edit the user prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
 
     # Initialize the OpenAI client with the user-provided API key if entered
     if api_key and st.button("Generate Response"):
