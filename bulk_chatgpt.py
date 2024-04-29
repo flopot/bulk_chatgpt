@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from openai import OpenAI
 import time
+import io
 
 # Title and Setup
 st.title('Bulk ChatGPT')
