@@ -38,7 +38,7 @@ if uploaded_file:
     user_prompt_template = st.text_area("Edit the user prompt", value="Edit the user prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
 
     # Initialize the OpenAI client with the user-provided API key if entered
-    if api_key and st.button("Generate Response"):
+    if st.button("Download Responses as CSV"):
         client = OpenAI(api_key=api_key)
         all_responses = []
 
@@ -66,4 +66,5 @@ if uploaded_file:
         # Create the DataFrame and download button if all rows are correct
         response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
         csv = response_df.to_csv(index=False).encode('utf-8')
-        st.download_button("Download Responses as CSV", csv, "responses.csv", "text/csv")
+        # Provide the download button for the CSV
+        st.download_button(label="Click to download", data=csv, file_name="responses.csv", mime="text/csv")
