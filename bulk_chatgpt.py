@@ -37,7 +37,7 @@ if uploaded_file and api_key:
     user_prompt_template = st.text_area("Edit the user prompt", value="Edit the user prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
 
     # Button to download responses as CSV
-    if st.button("Download Responses as CSV"):
+    if st.button("Generate Responses"):
         client = OpenAI(api_key=api_key)
         all_responses = []
 
@@ -66,4 +66,4 @@ if uploaded_file and api_key:
         csv = response_df.to_csv(index=False).encode('utf-8')
 
         # Provide the download button for the CSV
-        st.download_button(label="Click to download", data=csv, file_name="responses.csv", mime="text/csv")
+        st.download_button(label="Download as CSV", data=csv, file_name="responses.csv", mime="text/csv")
