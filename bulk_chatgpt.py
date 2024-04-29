@@ -62,15 +62,27 @@ if uploaded_file:
             all_responses.append(response)
             time.sleep(1)  # To avoid hitting API rate limits
 
-        # Debugging: Ensure each entry has the correct number of elements
-        expected_length = len(columns) + 1  # Expected number of elements (columns + response)
+        # Print columns for debugging
+        st.write("Columns being used:", columns)
+
+        # Iterate over each row in the DataFrame and collect responses
+        for index, row in df.iterrows():
+            response = generate_response(row)
+            response_data = [row[col] for col in columns] + [response]
+            
+            # Debugging: Print response data
+            if index == 0:  # Just print for the first row to check
+                st.write("Response data for row 0:", response_data)
+            
+            all_responses.append(response_data)
+
+        # Debugging: Check if the length is as expected
         for response_index, response_data in enumerate(all_responses):
-            if len(response_data) != expected_length:
-                st.error(f"Error in row {response_index}: Expected {expected_length} elements, got {len(response_data)}")
+            if len(response_data) != len(columns) + 1:
+                st.error(f"Error in row {response_index}: Expected {len(columns) + 1} elements, got {len(response_data)}")
                 break
         else:
-            # If all rows have the correct length, create the DataFrame
+            # Create the DataFrame and download button if all is well
             response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
-            # Convert DataFrame to CSV and create download button
             csv = response_df.to_csv(index=False).encode('utf-8')
             st.download_button("Download Responses as CSV", csv, "responses.csv", "text/csv")
