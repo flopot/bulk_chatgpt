@@ -56,43 +56,14 @@ if uploaded_file:
             )
             return response.choices[0].message.content.strip()
 
-        # Iterate over each row in the DataFrame
-        for index, row in df.iterrows():
-            response = generate_response(row)
-            all_responses.append(response)
-            time.sleep(1)  # To avoid hitting API rate limits
-
-        # Print columns for debugging
-        st.write("Columns being used:", columns)
-
-        # Initialize all_responses list to collect all data
-        all_responses = []
-
         # Iterate over each row in the DataFrame and collect responses
         for index, row in df.iterrows():
             response = generate_response(row)
             response_data = [row[col] for col in columns] + [response]  # Appends response to data
-
-            # Debugging: Print each response_data and its length
-            st.write(f"Response data for row {index}: {response_data}, Length: {len(response_data)}")
-            
             all_responses.append(response_data)
+            time.sleep(1)  # To avoid hitting API rate limits
 
-        # Additional check to log each row's length in all_responses
-        st.write("Checking all collected responses for consistency...")
-        for idx, data in enumerate(all_responses):
-            st.write(f"Row {idx} length: {len(data)}")
-
-        # Verify each entry has the correct length before attempting DataFrame creation
-        incorrect_lengths = []
-        for response_index, response_data in enumerate(all_responses):
-            if len(response_data) != len(columns) + 1:
-                incorrect_lengths.append((response_index, len(response_data)))
-
-        if incorrect_lengths:
-            st.error(f"Errors found in rows: {incorrect_lengths}")
-        else:
-            # If all rows are correct, create the DataFrame
-            response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
-            csv = response_df.to_csv(index=False).encode('utf-8')
-            st.download_button("Download Responses as CSV", csv, "responses.csv", "text/csv")
+        # Create the DataFrame and download button if all rows are correct
+        response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
+        csv = response_df.to_csv(index=False).encode('utf-8')
+        st.download_button("Download Responses as CSV", csv, "responses.csv", "text/csv")
