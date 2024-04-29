@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from openai import OpenAI
 import time
-import io
 
 # Title and Setup
 st.title('Bulk ChatGPT')
@@ -21,7 +20,7 @@ api_key = st.text_input("Enter your OpenAI API key", type="password")
 # File upload
 uploaded_file = st.file_uploader("Choose your CSV file", type=['csv'])
 
-if uploaded_file:
+if uploaded_file and api_key:
     # Read the uploaded file into a DataFrame to get column names
     df = pd.read_csv(uploaded_file)
     columns = df.columns.tolist()
@@ -37,14 +36,13 @@ if uploaded_file:
     system_prompt = st.text_area("Edit the system prompt", value="Edit the system prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
     user_prompt_template = st.text_area("Edit the user prompt", value="Edit the user prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
 
-    # Initialize the OpenAI client with the user-provided API key if entered
-    if api_key and st.button("Generate Responses"):
+    # Button to download responses as CSV
+    if st.button("Download Responses as CSV"):
         client = OpenAI(api_key=api_key)
         all_responses = []
 
-        # Function to generate SEO recommendations using the OpenAI client
+        # Function to generate responses using the OpenAI client
         def generate_response(row):
-            # Format the user prompt dynamically with variables from row
             formatted_user_prompt = user_prompt_template.format(**{var: row[col] for col, var in column_to_variable.items()})
             formatted_system_prompt = system_prompt.format(**{var: row[col] for col, var in column_to_variable.items()})
             response = client.chat.completions.create(
@@ -63,7 +61,9 @@ if uploaded_file:
             all_responses.append(response_data)
             time.sleep(1)  # To avoid hitting API rate limits
 
-        # Create the DataFrame and download button if all rows are correct
+        # Create the DataFrame
         response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
         csv = response_df.to_csv(index=False).encode('utf-8')
-        st.download_button("Download Responses as CSV", csv, "responses.csv", "text/csv")
+
+        # Provide the download button for the CSV
+        st.download_button(label="Click to download", data=csv, file_name="responses.csv", mime="text/csv")
