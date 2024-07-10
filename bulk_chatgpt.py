@@ -50,7 +50,7 @@ if uploaded_file and api_key:
                     {"role": "system", "content": formatted_system_prompt},
                     {"role": "user", "content": formatted_user_prompt}
                 ],
-                model="gpt-4"
+                model="gpt-4o"
             )
             return response.choices[0].message.content.strip()
 
