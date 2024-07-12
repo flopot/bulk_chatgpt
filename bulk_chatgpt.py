@@ -27,11 +27,11 @@ st.markdown(
         }
 
         button:hover{
-        border-color: black
+        border-color: black !important
         }
 
         button:hover p{
-        color: black
+        color: black !important
         }
         
     </style>
