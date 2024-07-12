@@ -30,8 +30,8 @@ st.markdown(
         border-color: black !important
         }
 
-        p:active{
-        color: black !important
+        button p:active {
+        color: black !important;
         }
         
     </style>
