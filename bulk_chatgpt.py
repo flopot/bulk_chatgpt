@@ -24,7 +24,16 @@ st.markdown(
         font-size: 16px;
         font-weight: 500;
         border-radius: 0px 0px 0px 0px;
-        }    
+        }
+
+        button:hover{
+        border-color: black
+        }
+
+        button:hover p{
+        color: black
+        }
+        
     </style>
     """,
     unsafe_allow_html=True
