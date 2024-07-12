@@ -30,7 +30,7 @@ st.markdown(
         border-color: black !important
         }
 
-        button:hover p{
+        button p:active{
         color: black !important
         }
         
