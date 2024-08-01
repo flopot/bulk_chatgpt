@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 from openai import OpenAI
 import time
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 # Custom CSS for styling and external stylesheet
 st.markdown(
@@ -32,7 +36,7 @@ st.markdown(
 )
 
 # Title and Setup
-st.title('Bulk ChatGPT v2')
+st.title('Bulk ChatGPT v3')
 
 # Subtitle
 st.markdown(
@@ -82,12 +86,27 @@ if uploaded_file and api_key:
             )
             return response.choices[0].message.content.strip()
 
-        # Iterate over each row in the DataFrame and collect responses
-        for index, row in df.iterrows():
-            response = generate_response(row)
-            response_data = [row[col] for col in columns] + [response]  # Appends response to data
-            all_responses.append(response_data)
-            #time.sleep(1)  # To avoid hitting API rate limits
+        # Batch processing
+        batch_size = 10  # Adjust the batch size as needed
+        num_batches = len(df) // batch_size + 1
+        for batch_num in range(num_batches):
+            start_idx = batch_num * batch_size
+            end_idx = start_idx + batch_size
+            batch_df = df.iloc[start_idx:end_idx]
+
+            # Iterate over each row in the batch and collect responses
+            for index, row in batch_df.iterrows():
+                try:
+                    response = generate_response(row)
+                    response_data = [row[col] for col in columns] + [response]  # Appends response to data
+                    all_responses.append(response_data)
+                except Exception as e:
+                    logging.error(f"Error processing row {index}: {e}")
+                # Respect API rate limits
+                #time.sleep(0.5)
+
+            # Update progress
+            st.write(f"Processed batch {batch_num + 1} of {num_batches}")
 
         # Create the DataFrame
         response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
