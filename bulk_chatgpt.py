@@ -68,6 +68,9 @@ if uploaded_file and api_key:
     system_prompt = st.text_area("Edit the system prompt", value="Edit the system prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
     user_prompt_template = st.text_area("Edit the user prompt", value="Edit the user prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
 
+    # Placeholder for progress updates
+    progress_text = st.empty()
+
     # Button to download responses as CSV
     if st.button("Generate Responses"):
         client = OpenAI(api_key=api_key)
@@ -106,7 +109,7 @@ if uploaded_file and api_key:
                 #time.sleep(0.5)
 
             # Update progress
-            st.write(f"Processed batch {batch_num + 1} of {num_batches}")
+            progress_text.text(f"Processed batch {batch_num + 1} of {num_batches}")
 
         # Create the DataFrame
         response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
