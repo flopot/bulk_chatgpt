@@ -32,7 +32,7 @@ st.markdown(
 )
 
 # Title and Setup
-st.title('Bulk ChatGPT')
+st.title('Bulk ChatGPT v2')
 
 # Subtitle
 st.markdown(
@@ -87,7 +87,7 @@ if uploaded_file and api_key:
             response = generate_response(row)
             response_data = [row[col] for col in columns] + [response]  # Appends response to data
             all_responses.append(response_data)
-            time.sleep(1)  # To avoid hitting API rate limits
+            #time.sleep(1)  # To avoid hitting API rate limits
 
         # Create the DataFrame
         response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
