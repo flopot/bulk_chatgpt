@@ -36,6 +36,19 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Set the refresh interval (in seconds)
+refresh_interval = 600  # Refresh every 60 seconds
+
+# Automatically refresh the app
+st_autorefresh(interval=refresh_interval * 1000, key="datarefresh")
+
+# This function will execute every time the app refreshes
+def wake_up():
+    st.write(f"App last refreshed at {time.ctime()}")
+
+# Call the wake-up function to simulate activity
+wake_up()
+
 # Title and Setup
 st.title('Bulk ChatGPT v3')
 
