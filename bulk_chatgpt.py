@@ -72,7 +72,7 @@ if uploaded_file and api_key:
     # Placeholder for progress updates
     progress_text = st.empty()
 
-    # Button to download responses as CSV
+    # Button to generate responses
     if st.button("Generate Responses"):
         client = OpenAI(api_key=api_key)
         all_responses = []
