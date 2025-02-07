@@ -8,33 +8,33 @@ import logging
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
-# Custom CSS for styling and external stylesheet
-st.markdown(
-    """
-    <style>
-        p,.appview-container,h1,.stHeadingWithActionElements,.stWidgetLabel,.stMarkdown,.st-ae,.st-bd,.st-be,.st-bf,.st-bg,.st-bh,.st-bi,.st-bj,.st-bk,.st-bl,.st-bm,.st-ah,.st-bn,.st-bo,.st-bp,.st-bq,.st-br,.st-bs,.st-bt,.st-bu,.st-ax,.st-ay,.st-az,.st-bv,.st-b1,.st-b2,.st-bc,.st-bw,.st-bx,.st-by{
-        color: black !important;
-        font-family: "Raleway", Sans-serif;
-        }
+#Custom CSS for styling and external stylesheet
+#st.markdown(
+ #   """
+  #  <style>
+   #     p,.appview-container,h1,.stHeadingWithActionElements,.stWidgetLabel,.stMarkdown,.st-ae,.st-bd,.st-be,.st-bf,.st-bg,.st-bh,.st-bi,.st-bj,.st-bk,.st-bl,.st-bm,.st-ah,.st-bn,.st-bo,.st-bp,.st-bq,.st-br,.st-bs,.st-bt,.st-bu,.st-ax,.st-ay,.st-az,.st-bv,.st-b1,.st-b2,.st-bc,.st-bw,.st-bx,.st-by{
+    #    color: black !important;
+     #   font-family: "Raleway", Sans-serif;
+      #  }
 
-        .appview-container,h1,.stHeadingWithActionElements,.stWidgetLabel,.stMarkdown,.st-ae,.st-bd,.st-be,.st-bf,.st-bg,.st-bh,.st-bi,.st-bj,.st-bk,.st-bl,.st-bm,.st-ah,.st-bn,.st-bo,.st-bp,.st-bq,.st-br,.st-bs,.st-bt,.st-bu,.st-ax,.st-ay,.st-az,.st-bv,.st-b1,.st-b2,.st-bc,.st-bw,.st-bx,.st-by{
-        background-color: white !important;
-        }
+       # .appview-container,h1,.stHeadingWithActionElements,.stWidgetLabel,.stMarkdown,.st-ae,.st-bd,.st-be,.st-bf,.st-bg,.st-bh,.st-bi,.st-bj,.st-bk,.st-bl,.st-bm,.st-ah,.st-bn,.st-bo,.st-bp,.st-bq,.st-br,.st-bs,.st-bt,.st-bu,.st-ax,.st-ay,.st-az,.st-bv,.st-b1,.st-b2,.st-bc,.st-bw,.st-bx,.st-by{
+        #background-color: white !important;
+        #}
+#        
+ #       button{
+  #      background-color: #1098A7 !important;
+   #     border: none;
+    #    outline: none;
+     #   font-family: "Raleway", Sans-serif;
+      #  font-size: 16px;
+       # font-weight: 500;
+        #border-radius: 0px 0px 0px 0px;
+        #}
         
-        button{
-        background-color: #1098A7 !important;
-        border: none;
-        outline: none;
-        font-family: "Raleway", Sans-serif;
-        font-size: 16px;
-        font-weight: 500;
-        border-radius: 0px 0px 0px 0px;
-        }
-        
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+    #</style>
+    #""",
+ #   unsafe_allow_html=True
+#)
 
 # Title and Setup
 st.title('Bulk ChatGPT v3')
@@ -91,7 +91,7 @@ if uploaded_file and api_key:
             return response.choices[0].message.content.strip()
 
         # Batch processing
-        batch_size = 10  # Adjust the batch size as needed
+        batch_size = 100  # Adjust the batch size as needed
         num_batches = len(df) // batch_size + 1
         for batch_num in range(num_batches):
             start_idx = batch_num * batch_size
