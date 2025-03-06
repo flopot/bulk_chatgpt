@@ -4,37 +4,8 @@ from openai import OpenAI
 import time
 import logging
 
-
 # Set up logging
 logging.basicConfig(level=logging.INFO)
-
-#Custom CSS for styling and external stylesheet
-#st.markdown(
- #   """
-  #  <style>
-   #     p,.appview-container,h1,.stHeadingWithActionElements,.stWidgetLabel,.stMarkdown,.st-ae,.st-bd,.st-be,.st-bf,.st-bg,.st-bh,.st-bi,.st-bj,.st-bk,.st-bl,.st-bm,.st-ah,.st-bn,.st-bo,.st-bp,.st-bq,.st-br,.st-bs,.st-bt,.st-bu,.st-ax,.st-ay,.st-az,.st-bv,.st-b1,.st-b2,.st-bc,.st-bw,.st-bx,.st-by{
-    #    color: black !important;
-     #   font-family: "Raleway", Sans-serif;
-      #  }
-
-       # .appview-container,h1,.stHeadingWithActionElements,.stWidgetLabel,.stMarkdown,.st-ae,.st-bd,.st-be,.st-bf,.st-bg,.st-bh,.st-bi,.st-bj,.st-bk,.st-bl,.st-bm,.st-ah,.st-bn,.st-bo,.st-bp,.st-bq,.st-br,.st-bs,.st-bt,.st-bu,.st-ax,.st-ay,.st-az,.st-bv,.st-b1,.st-b2,.st-bc,.st-bw,.st-bx,.st-by{
-        #background-color: white !important;
-        #}
-#        
- #       button{
-  #      background-color: #1098A7 !important;
-   #     border: none;
-    #    outline: none;
-     #   font-family: "Raleway", Sans-serif;
-      #  font-size: 16px;
-       # font-weight: 500;
-        #border-radius: 0px 0px 0px 0px;
-        #}
-        
-    #</style>
-    #""",
- #   unsafe_allow_html=True
-#)
 
 # Title and Setup
 st.title('Bulk ChatGPT')
@@ -106,8 +77,6 @@ if uploaded_file and api_key:
                     all_responses.append(response_data)
                 except Exception as e:
                     logging.error(f"Error processing row {index}: {e}")
-                # Respect API rate limits
-                #time.sleep(0.5)
 
             # Update progress
             progress_text.text(f"Processed batch {batch_num + 1} of {num_batches}")
