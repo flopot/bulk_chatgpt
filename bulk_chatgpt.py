@@ -1,89 +1,120 @@
 import streamlit as st
 import pandas as pd
-from openai import OpenAI
-import time
+import asyncio
 import logging
+import csv
+import os
+import tiktoken
+from openai import AsyncOpenAI
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
-# Title and Setup
+# Constants
+TOKEN_LIMIT = 128000  # GPT-4o-mini context window
+SAFETY_MARGIN = 1000  # Leave room for responses
+MAX_CONCURRENT_REQUESTS = 5  # Adjust based on rate limits
+OUTPUT_FILE = "responses.csv"
+
+# Streamlit UI
 st.title('Bulk ChatGPT')
+st.markdown("""by [Florian Potier](https://twitter.com/FloPots) - [Intrepid Digital](https://www.intrepidonline.com/)
+""", unsafe_allow_html=True)
 
-# Subtitle
-st.markdown(
-    """
-    by [Florian Potier](https://twitter.com/FloPots) - [Intrepid Digital](https://www.intrepidonline.com/)
-    """,
-    unsafe_allow_html=True
-)
-
-# Input for the OpenAI API key
 api_key = st.text_input("Enter your OpenAI API key", type="password")
-
-# File upload
 uploaded_file = st.file_uploader("Choose your CSV file", type=['csv'])
 
 if uploaded_file and api_key:
-    # Read the uploaded file into a DataFrame to get column names
     df = pd.read_csv(uploaded_file)
     columns = df.columns.tolist()
 
-    # Allow user to map columns to variable names
+    # Column mapping
     st.write("Map each column to a variable name that will be used in the prompts:")
     column_to_variable = {}
     for column in columns:
         variable_name = st.text_input(f"Enter a variable name for {column}", value=column)
         column_to_variable[column] = variable_name
 
-    # System and User Prompts customization
-    system_prompt = st.text_area("Edit the system prompt", value="Edit the system prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
-    user_prompt_template = st.text_area("Edit the user prompt", value="Edit the user prompt. You can include any of the variable names defined above surrounded by curly braces, like {variable_name}.")
+    # Prompt customization
+    system_prompt = st.text_area("Edit the system prompt", 
+                                 value="Edit the system prompt. You can include {variable_name}.")
+    user_prompt_template = st.text_area("Edit the user prompt", 
+                                        value="Edit the user prompt. You can include {variable_name}.")
 
-    # Placeholder for progress updates
-    progress_text = st.empty()
+    # Token counter
+    encoding = tiktoken.encoding_for_model("gpt-4o-mini")
+    def count_tokens(text: str) -> int:
+        return len(encoding.encode(text))
 
-    # Button to generate responses
+    # Async OpenAI client
+    client = AsyncOpenAI(api_key=api_key)
+
+    # Async function to generate response
+    async def generate_response(row):
+        formatted_user_prompt = user_prompt_template.format(**{var: row[col] for col, var in column_to_variable.items()})
+        formatted_system_prompt = system_prompt.format(**{var: row[col] for col, var in column_to_variable.items()})
+
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                response = await client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": formatted_system_prompt},
+                        {"role": "user", "content": formatted_user_prompt}
+                    ],
+                    model="gpt-4o-mini"
+                )
+                return response.choices[0].message.content.strip()
+            except Exception as e:
+                logging.error(f"Error generating response: {e}")
+                retry_count += 1
+                await asyncio.sleep(2 ** retry_count)
+        return "ERROR"
+
+    # Async batch processing
+    async def process_batch(batch_data):
+        tasks = [generate_response(row) for row in batch_data]
+        return await asyncio.gather(*tasks)
+
+    # Button to start processing
     if st.button("Generate Responses"):
-        client = OpenAI(api_key=api_key)
-        all_responses = []
+        progress_bar = st.progress(0)
+        response_list = []
+        num_rows = len(df)
+        processed_rows = 0
 
-        # Function to generate responses using the OpenAI client
-        def generate_response(row):
-            formatted_user_prompt = user_prompt_template.format(**{var: row[col] for col, var in column_to_variable.items()})
-            formatted_system_prompt = system_prompt.format(**{var: row[col] for col, var in column_to_variable.items()})
-            response = client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": formatted_system_prompt},
-                    {"role": "user", "content": formatted_user_prompt}
-                ],
-                model="gpt-4o-mini"
-            )
-            return response.choices[0].message.content.strip()
+        # Process rows dynamically adjusting batch size
+        async def process_data():
+            nonlocal processed_rows
+            while processed_rows < num_rows:
+                batch_data = []
+                batch_tokens = 0
+                batch_size = 10
 
-        # Batch processing
-        batch_size = 100  # Adjust the batch size as needed
-        num_batches = len(df) // batch_size + 1
-        for batch_num in range(num_batches):
-            start_idx = batch_num * batch_size
-            end_idx = start_idx + batch_size
-            batch_df = df.iloc[start_idx:end_idx]
+                for i in range(batch_size):
+                    if processed_rows + i >= num_rows:
+                        break
+                    row = df.iloc[processed_rows + i]
+                    user_prompt_tokens = count_tokens(user_prompt_template.format(**{var: row[col] for col, var in column_to_variable.items()}))
+                    system_prompt_tokens = count_tokens(system_prompt.format(**{var: row[col] for col, var in column_to_variable.items()}))
+                    total_prompt_tokens = user_prompt_tokens + system_prompt_tokens
+                    batch_tokens += total_prompt_tokens
 
-            # Iterate over each row in the batch and collect responses
-            for index, row in batch_df.iterrows():
-                try:
-                    response = generate_response(row)
-                    response_data = [row[col] for col in columns] + [response]  # Appends response to data
-                    all_responses.append(response_data)
-                except Exception as e:
-                    logging.error(f"Error processing row {index}: {e}")
+                    if batch_tokens > TOKEN_LIMIT - SAFETY_MARGIN:
+                        break
+                    batch_data.append(row)
 
-            # Update progress
-            progress_text.text(f"Processed batch {batch_num + 1} of {num_batches}")
+                if not batch_data:
+                    break
 
-        # Create the DataFrame
-        response_df = pd.DataFrame(all_responses, columns=columns + ['Response'])
-        csv = response_df.to_csv(index=False).encode('utf-8')
+                responses = await process_batch(batch_data)
+                for row, response in zip(batch_data, responses):
+                    response_list.append([row[col] for col in columns] + [response])
 
-        # Provide the download button for the CSV
-        st.download_button(label="Download as CSV", data=csv, file_name="responses.csv", mime="text/csv")
+                processed_rows += len(batch_data)
+                progress_bar.progress(processed_rows / num_rows)
+
+        asyncio.run(process_data())
+        response_df = pd.DataFrame(response_list, columns=columns + ['Response'])
+        csv_data = response_df.to_csv(index=False).encode('utf-8')
+        st.download_button("Download as CSV", csv_data, "responses.csv", "text/csv")
