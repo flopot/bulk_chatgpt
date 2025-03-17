@@ -17,7 +17,7 @@ MAX_CONCURRENT_REQUESTS = 5  # Adjust based on rate limits
 OUTPUT_FILE = "responses.csv"
 
 # Streamlit UI
-st.title('Bulk ChatGPT')
+st.title('Bulk ChatGPT (Optimized)')
 st.markdown("""by [Florian Potier](https://twitter.com/FloPots) - [Intrepid Digital](https://www.intrepidonline.com/)
 """, unsafe_allow_html=True)
 
@@ -81,11 +81,9 @@ if uploaded_file and api_key:
         progress_bar = st.progress(0)
         response_list = []
         num_rows = len(df)
-        processed_rows = 0
-
-        # Process rows dynamically adjusting batch size
+        
         async def process_data():
-            nonlocal processed_rows
+            processed_rows = 0
             while processed_rows < num_rows:
                 batch_data = []
                 batch_tokens = 0
