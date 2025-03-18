@@ -17,7 +17,7 @@ MAX_CONCURRENT_REQUESTS = 5  # Adjust based on rate limits
 OUTPUT_FILE = "responses.csv"
 
 # Streamlit UI
-st.title('Bulk ChatGPT (Optimized)')
+st.title('Bulk ChatGPT')
 st.markdown("""by [Florian Potier](https://twitter.com/FloPots) - [Intrepid Digital](https://www.intrepidonline.com/)
 """, unsafe_allow_html=True)
 
