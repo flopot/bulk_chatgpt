@@ -1,5 +1,6 @@
 streamlit
 pandas
-openai
-requests
-tiktoken
+scikit-learn
+sentence-transformers
+torch
+transformers
